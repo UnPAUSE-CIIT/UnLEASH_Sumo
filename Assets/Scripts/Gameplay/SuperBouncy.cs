@@ -11,7 +11,7 @@ using UnityEngine;
 public class SuperBouncy : MonoBehaviour
 {
     [Header( "Bounce Settings" )]
-    [SerializeField][Range( 0f, 3f )] float _bounceMultiplier = 2f;
+    [SerializeField][Range( 0f, 10f )] float _bounceMultiplier = 2f;
 
     void Awake()
     {
