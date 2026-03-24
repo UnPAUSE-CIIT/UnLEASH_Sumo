@@ -143,11 +143,11 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        PlayerController otherPlayer = collision.gameObject.GetComponent<PlayerController>();
-        if ( otherPlayer == null )
-        {
+        if ( !collision.gameObject.TryGetComponent<PlayerController>( out var otherPlayer ) )
             return;
-        }
+
+        if ( otherPlayer._isStunned )
+            return;
 
         float mySpeed = GetHorizontalSpeed();
         float otherSpeed = otherPlayer.GetHorizontalSpeed();
@@ -221,7 +221,7 @@ public class PlayerController : MonoBehaviour
             force.y = 0f;
             _rb.AddForce( force, ForceMode.Acceleration );
 
-            Vector3 horizontalVel = new Vector3( _rb.linearVelocity.x, 0f, _rb.linearVelocity.z );
+            Vector3 horizontalVel = new( _rb.linearVelocity.x, 0f, _rb.linearVelocity.z );
             if ( horizontalVel.magnitude > _maxSpeed )
             {
                 horizontalVel = horizontalVel.normalized * _maxSpeed;
