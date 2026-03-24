@@ -51,6 +51,91 @@ public class LDTool : EditorWindow
         {
             GoToMainCamera();
         }
+
+        EditorGUILayout.Space();
+        EditorGUILayout.LabelField( "Convert to:", EditorStyles.boldLabel );
+
+        if ( GUILayout.Button( "Stunner" ) )
+        {
+            ConvertToStunner();
+        }
+
+        if ( GUILayout.Button( "SuperBouncy" ) )
+        {
+            ConvertToSuperBouncy();
+        }
+    }
+
+    static void ConvertToStunner()
+    {
+        if ( Selection.activeGameObject == null )
+        {
+            Debug.LogWarning( "No object selected." );
+            return;
+        }
+
+        GameObject selected = Selection.activeGameObject;
+
+        Rigidbody rb = selected.GetComponent<Rigidbody>();
+        if ( rb == null )
+        {
+            rb = Undo.AddComponent<Rigidbody>( selected );
+        }
+        Undo.RecordObject( rb, "Set Rigidbody properties" );
+        rb.isKinematic = true;
+        rb.useGravity = false;
+
+        BoxCollider boxCollider = selected.GetComponent<BoxCollider>();
+        if ( boxCollider == null )
+        {
+            boxCollider = Undo.AddComponent<BoxCollider>( selected );
+        }
+        Undo.RecordObject( boxCollider, "Set BoxCollider properties" );
+        boxCollider.isTrigger = true;
+
+        Stunner stunner = selected.GetComponent<Stunner>();
+        if ( stunner == null )
+        {
+            Undo.AddComponent<Stunner>( selected );
+        }
+
+        Debug.Log( $"Converted {selected.name} to Stunner" );
+    }
+
+    static void ConvertToSuperBouncy()
+    {
+        if ( Selection.activeGameObject == null )
+        {
+            Debug.LogWarning( "No object selected." );
+            return;
+        }
+
+        GameObject selected = Selection.activeGameObject;
+
+        Rigidbody rb = selected.GetComponent<Rigidbody>();
+        if ( rb == null )
+        {
+            rb = Undo.AddComponent<Rigidbody>( selected );
+        }
+        Undo.RecordObject( rb, "Set Rigidbody properties" );
+        rb.isKinematic = true;
+        rb.useGravity = false;
+
+        BoxCollider boxCollider = selected.GetComponent<BoxCollider>();
+        if ( boxCollider == null )
+        {
+            boxCollider = Undo.AddComponent<BoxCollider>( selected );
+        }
+        Undo.RecordObject( boxCollider, "Set BoxCollider properties" );
+        boxCollider.isTrigger = false;
+
+        SuperBouncy superBouncy = selected.GetComponent<SuperBouncy>();
+        if ( superBouncy == null )
+        {
+            Undo.AddComponent<SuperBouncy>( selected );
+        }
+
+        Debug.Log( $"Converted {selected.name} to SuperBouncy" );
     }
 
     static void GoToMainCamera()
