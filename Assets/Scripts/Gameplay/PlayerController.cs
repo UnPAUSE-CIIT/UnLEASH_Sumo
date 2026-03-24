@@ -28,6 +28,10 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float _knockbackForce = 20f;
     [SerializeField] float _minSpeedForBump = 2f;
 
+    [Header("Respawn Settings")]
+    [SerializeField] string _deathTag = "DeathFloor";
+    [SerializeField] Vector2 _respawnRange = new Vector2( -2f, 2f );
+
     bool _isStunned;
     float _stunTimer;
     float _bounceCooldown;
@@ -35,6 +39,7 @@ public class PlayerController : MonoBehaviour
     Rigidbody _rb;
 	Animator _anim;
     Vector3 _inputDirection;
+    PlayerController _otherPlayer;
 
     void Awake()
     {
@@ -44,6 +49,21 @@ public class PlayerController : MonoBehaviour
         _rb.freezeRotation = true;
         _rb.linearDamping = 3f;
         _rb.angularDamping = 0.05f;
+
+        FindOtherPlayer();
+    }
+
+    void FindOtherPlayer()
+    {
+        PlayerController[] allPlayers = FindObjectsByType<PlayerController>( FindObjectsSortMode.None );
+        foreach ( PlayerController player in allPlayers )
+        {
+            if ( player._playerNumber != _playerNumber )
+            {
+                _otherPlayer = player;
+                break;
+            }
+        }
     }
 
     void FixedUpdate()
@@ -58,9 +78,44 @@ public class PlayerController : MonoBehaviour
             _bounceCooldown -= Time.deltaTime;
         }
 
+        CheckDeath();
         HandleStun();
         HandleInput();
 		HandleAnimations();
+    }
+
+    void CheckDeath()
+    {
+        if ( transform.position.y < -10f )
+        {
+            Respawn();
+            if ( _otherPlayer != null )
+            {
+                _otherPlayer.AddScore();
+            }
+        }
+    }
+
+
+
+    public void AddScore()
+    {
+        if ( Game.Instance != null )
+        {
+            Game.Instance.AddScore( _playerNumber );
+        }
+    }
+
+    void Respawn()
+    {
+        float randomX = Random.Range( _respawnRange.x, _respawnRange.y );
+        float randomZ = Random.Range( _respawnRange.x, _respawnRange.y );
+        Vector3 respawnPos = new Vector3( randomX, 2f, randomZ );
+
+        _rb.linearVelocity = Vector3.zero;
+        _rb.angularVelocity = Vector3.zero;
+        transform.position = respawnPos;
+        transform.rotation = Quaternion.identity;
     }
 
     void HandleInput()
@@ -138,6 +193,16 @@ public class PlayerController : MonoBehaviour
 
     void OnCollisionEnter( Collision collision )
     {
+        if ( collision.gameObject.CompareTag( _deathTag ) )
+        {
+            Respawn();
+            if ( _otherPlayer != null )
+            {
+                _otherPlayer.AddScore();
+            }
+            return;
+        }
+
         if ( _isStunned )
         {
             return;

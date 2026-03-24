@@ -13,20 +13,14 @@ public class CameraController : MonoBehaviour
     [SerializeField] Transform _player2;
 
     [Header("Camera Settings")]
-    [SerializeField] float _defaultDistance = 15f;
-    [SerializeField] float _minDistance = 8f;
-    [SerializeField] float _maxDistance = 25f;
+    [SerializeField] Vector3 _offset = new Vector3( 0f, 15f, -15f );
     [SerializeField] float _smoothSpeed = 5f;
-    [SerializeField] float _heightOffset = 10f;
     [SerializeField] float _boundsPadding = 3f;
-
-    Camera _cam;
-    float _currentDistance;
+    [SerializeField] float _minZoom = 1f;
+    [SerializeField] float _maxZoom = 2f;
 
     void Start()
     {
-        _cam = GetComponent<Camera>();
-        _currentDistance = _defaultDistance;
     }
 
     void LateUpdate()
@@ -40,7 +34,6 @@ public class CameraController : MonoBehaviour
         Vector3 targetPosition = CalculateCameraPosition( centerPoint );
 
         transform.position = Vector3.Lerp( transform.position, targetPosition, Time.deltaTime * _smoothSpeed );
-        transform.LookAt( centerPoint );
     }
 
     Vector3 GetCenterPoint()
@@ -60,23 +53,9 @@ public class CameraController : MonoBehaviour
         playerBounds.Encapsulate( _player2.position );
 
         float maxExtent = Mathf.Max( playerBounds.extents.x, playerBounds.extents.z );
-        float targetDistance = ( maxExtent + _boundsPadding ) * 2f;
-        targetDistance = Mathf.Clamp( targetDistance, _minDistance, _maxDistance );
+        float zoomFactor = Mathf.Clamp( ( maxExtent + _boundsPadding ) / 10f, _minZoom, _maxZoom );
 
-        _currentDistance = Mathf.Lerp( _currentDistance, targetDistance, Time.deltaTime * _smoothSpeed );
-
-        Vector3 direction = ( transform.position - centerPoint ).normalized;
-        if ( direction == Vector3.zero )
-        {
-            direction = Vector3.back;
-        }
-
-        direction.y = 0f;
-        direction.Normalize();
-
-        Vector3 cameraPos = centerPoint + direction * _currentDistance;
-        cameraPos.y = centerPoint.y + _heightOffset;
-
-        return cameraPos;
+        Vector3 scaledOffset = _offset * zoomFactor;
+        return centerPoint + scaledOffset;
     }
 }
